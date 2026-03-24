@@ -1,220 +1,218 @@
 # SafariIQ — Predictive Safari Intelligence System
-### Public / Customer-Facing Website
 
-> Built for **UNPLUGGED Hackathon, DJSCE 2026**  
-> Stack: **React 18 + Vite 8 + Tailwind CSS v3 + React Router DOM v7**
+A full-stack IoT-powered wildlife safari management platform. This repository contains the **public customer website** and **ranger command dashboard** — the software layer of an ESP32 + LoRa sensor network built for a hardware hackathon.
 
 ---
 
-## 🚀 Getting Started
+## Hackathon Context
+
+| Field | Detail |
+|---|---|
+| **Event** | UNPLUGGED — 24-Hour Hardware Hackathon |
+| **Organiser** | DJSCE IETE-ISF × DJS MicroMinds, SVKM |
+| **Date** | 11–12 April 2026 |
+| **Method** | IoT / Embedded (Method 1) |
+| **Tasks** | Task 1 (Software) + Task 2 (Hardware) |
+
+---
+
+## System Overview
+
+The platform is built around a **4-phase IoT architecture**:
+
+**Phase 1 — Wildlife Cluster Nodes** → ESP32-CAM + PIR sensors placed across park zones detect animal motion, identify species, and broadcast detection events over LoRa radio.
+
+**Phase 2 — Vehicle Intelligence Nodes** → Each safari jeep carries a GPS module + LoRa transmitter, broadcasting live location to the central gateway every few seconds.
+
+**Phase 3 — Central Gateway & Server** → A Node.js server receives LoRa packets, calculates movement vectors, dynamically zones the park, and generates routing commands for each jeep.
+
+**Phase 4 — Control Dashboard** → Rangers view live jeep movement tracks, zone overlays, wildlife intelligence, routing commands, bookings, and guest messages on the web dashboard.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19 + Vite 8 |
+| Routing | React Router DOM v7 |
+| Styling | Tailwind CSS v3 (custom tokens) |
+| Fonts | Playfair Display (serif) + Inter (sans) |
+| Maps | Leaflet + React-Leaflet + OpenStreetMap |
+| Auth | Hardcoded `useState` guard (dev only) |
+| Backend | Node.js + Express (planned, separate repo) |
+| Hardware | ESP32, ESP32-CAM, LoRa SX1278, GPS NEO-6M |
+
+---
+
+## File Structure
+
+```text
+src/
+├── main.jsx
+├── App.jsx
+├── index.css
+│
+├── shared/
+│   ├── Navbar.jsx
+│   └── Footer.jsx
+│
+├── customer/
+│   ├── pages/
+│   │   ├── Home.jsx
+│   │   ├── Booking.jsx
+│   │   └── Contact.jsx
+│   └── components/
+│       ├── PackageCard.jsx
+│       ├── TestimonialCard.jsx
+│       ├── StepTimeline.jsx
+│       ├── BookingSummary.jsx
+│       └── FAQAccordion.jsx
+│
+└── ranger/
+    ├── pages/
+    │   ├── RangerLogin.jsx
+    │   ├── RangerDashboard.jsx
+    │   ├── RangerBookingsPage.jsx
+    │   └── RangerMessagesPage.jsx
+    └── components/
+        ├── RangerShell.jsx
+        ├── JeepPanel.jsx
+        ├── ZoneMap.jsx
+        ├── RoutingCommandLog.jsx
+        ├── WildlifeEventFeed.jsx
+        ├── AnimalTracker.jsx
+        ├── ContactMessageFeed.jsx
+        ├── BookingSummaryPanel.jsx
+        └── DisturbanceIndexBadge.jsx
+```
+
+---
+
+## Pages & Features
+
+### Customer Side
+
+| Route | Page | Key Sections |
+|---|---|---|
+| `/` | Home | Hero · Why Smart Safari · How It Works · Packages · Stats · Testimonials · CTA |
+| `/book` | Booking | Form + live summary + confirmation |
+| `/contact` | Contact | Contact form + park info + FAQ |
+
+### Ranger Side
+
+| Route | Page | Auth |
+|---|---|---|
+| `/ranger` | Login | Open |
+| `/ranger/dashboard` | Control Center | Protected |
+| `/ranger/bookings` | Today’s Bookings | Protected |
+| `/ranger/messages` | Guest Messages | Protected |
+
+---
+
+## Ranger UI (Current)
+
+### RangerShell / Navbar
+- Single thin top navbar (merged; no secondary row)
+- Center nav tabs: Control Center / Today’s Bookings / Guest Messages
+- DI badge moved toward center cluster
+- DI pulse ring animation when DI > 15
+- System status includes **6 jeep dots** (instant fleet health)
+- Logout placed on right edge
+
+### Control Center Layout
+- No full-page scrolling (`h-screen`, overflow locked)
+- Left column: `Active Jeeps`, `Tracked Species`, `Wildlife Population`
+- Right column: `Live Zone Map` (top), `Routing Commands` (bottom)
+- Each panel has independent internal scrolling
+
+### Left Panel Details
+- **Active Jeeps**
+  - Status dot next to jeep ID (green active, amber idle, red alert)
+  - Subtitle line combines zone + ping (`Zone A · 8s ago`)
+  - Guest occupancy shown as progress bar
+  - Progress colors: green (<50%), amber (50–80%), orange (>80%), red (full)
+- **Tracked Species**
+  - Vertical list layout
+  - 3px left border by rarity (red high, amber medium, blue low)
+  - Rarity text labels removed for cleaner scan
+
+### Routing Commands
+- 3px left severity border:
+  - red = ALERT
+  - orange = REROUTE / WARN
+  - gray = INFO
+- Message is primary bold line
+- Timestamp + Jeep ID moved to subtitle
+- `✓ ACK` interaction per row
+- Acknowledged row fades to 50% and badge becomes `DONE` (gray)
+
+### Live Map
+- Real interactive **Leaflet** map using OpenStreetMap tiles
+- Colored patrol tracks drawn as polylines
+- Moving jeep circles animated along tracks
+- Tooltip on each jeep marker (`J-0x`, status)
+- Distinct colored zone overlays (`Zone A` to `Zone E`) with labels
+
+---
+
+## Mock Data vs Planned Live Data
+
+| Data | Current State | Planned Source |
+|---|---|---|
+| Jeep movement | Simulated movement along predefined map tracks | GPS + LoRa → WebSocket |
+| Wildlife events | Static mock array in UI | ESP32-CAM + LoRa → backend stream |
+| Zone overlays | Static zone circles on map | Dynamic zoning from server model |
+| Routing commands | Mock command list + local ACK state | Gateway/server-generated command stream |
+| Bookings | Static panel data + booking form state | Node.js/Express REST API |
+| Contact messages | Mock inbox list | Express backend |
+| Disturbance Index | Mock formula (`43/4 = 10.75`) | Live DI from server telemetry |
+
+---
+
+## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
-
-# App runs at → http://localhost:5173
 ```
 
----
+App runs at: `http://localhost:5173`
 
-## 📁 Project Structure
+### Routes
 
-```
-Webpage/
-├── index.html                  # HTML entry (SEO meta, OG tags, paw favicon)
-├── tailwind.config.js          # Custom color tokens + font families
-├── postcss.config.js           # PostCSS config for Tailwind
-├── vite.config.js              # Vite config
-├── package.json
-└── src/
-    ├── main.jsx                # React DOM entry point
-    ├── App.jsx                 # Router setup — wraps all pages in Navbar + Footer
-    ├── index.css               # Google Fonts import + Tailwind base/utilities
-    │
-    ├── components/
-    │   ├── Navbar.jsx          # Sticky navbar, scroll-aware, mobile hamburger
-    │   ├── Footer.jsx          # Logo, tagline, links, social icons, copyright
-    │   ├── PackageCard.jsx     # Safari package cards (supports "highlighted" state)
-    │   ├── TestimonialCard.jsx # 5-star quote cards with author avatar initial
-    │   ├── StepTimeline.jsx    # 4-step horizontal (desktop) / vertical (mobile) timeline
-    │   ├── BookingSummary.jsx  # Live-updating booking summary + price calculator
-    │   └── FAQAccordion.jsx    # Animated expandable FAQ accordion
-    │
-    └── pages/
-        ├── Home.jsx            # / — Home page (6 sections)
-        ├── Booking.jsx         # /book — Booking form + live summary
-        └── Contact.jsx         # /contact — Contact form + park info + FAQ
-```
-
----
-
-## 🎨 Design System
-
-### Color Tokens (`tailwind.config.js`)
-
-| Token | Hex | Usage |
-|---|---|---|
-| `safari-dark` | `#0a0f0d` | Primary background |
-| `safari-darker` | `#111816` | Card / section background |
-| `safari-green` | `#166534` | Forest green accents, borders |
-| `safari-amber` | `#d97706` | Primary accent, CTAs, highlights |
-| `safari-amber-light` | `#f59e0b` | Hover state for amber |
-| `safari-cream` | `#f5f0e8` | Body text, headings |
-| `safari-muted` | `#6b7280` | Muted labels |
-
-### Typography
-
-| Font | Use |
+| URL | Page |
 |---|---|
-| **Playfair Display** (serif) | All headings (`h1`–`h4`) |
-| **Inter** (sans-serif) | Body, labels, buttons |
+| `/` | Customer Home |
+| `/book` | Booking |
+| `/contact` | Contact |
+| `/ranger` | Ranger Login |
+| `/ranger/dashboard` | Ranger Control Center |
+| `/ranger/bookings` | Ranger Today’s Bookings |
+| `/ranger/messages` | Ranger Guest Messages |
 
 ---
 
-## 🗺️ Pages
+## Credentials (Dev Only)
 
-### Page 1 — Home (`/`)
-
-| Section | Content |
-|---|---|
-| **Hero** | Full-viewport dark hero, amber gradient headline, IoT badge, two CTAs: "Book Your Safari" → `/book`, "How It Works" → smooth scroll |
-| **Why Smart Safari** | 3 feature cards: Wildlife-First Routing 🐅, Zero Overcrowding 🚙, Conservation by Design 🌿 |
-| **How It Works** | 4-step timeline: Wildlife Sensors 👁️ → Jeep Tracking 🛰️ → Predictive Intelligence 🧠 → Smart Routing 🗺️ |
-| **Safari Packages** | 3 cards: Dawn Patrol (₹1,499), Golden Hour ⭐ (₹1,799, highlighted), Full Day Expedition (₹4,999) |
-| **Stats Bar** | 5,000+ Safaris · 47 Species Tracked · 6 Smart Zones · 98% Satisfaction |
-| **Testimonials** | 3 guest quote cards — Priya M. (Mumbai), Rahul S. (Pune), Ananya K. (Bangalore) |
-| **CTA Banner** | Full-width gradient banner → "Book Your Safari" |
-
----
-
-### Page 2 — Booking (`/book`)
-
-**Two-column layout** (form left, summary right; single column on mobile)
-
-**Left — Form fields:**
-1. Full Name (text)
-2. Email (email)
-3. Phone Number (tel)
-4. Safari Date (date, no past dates via `min`)
-5. Time Slot (dropdown): Dawn Patrol · Golden Hour · Full Day Expedition
-6. Number of Guests (number, min 1 / max 6)
-7. Jeep Type (styled radio toggle): Open Jeep · Covered Jeep
-8. Special Requests (optional textarea)
-
-**Right — Live Booking Summary (`BookingSummary.jsx`):**
-- Safari Type, Date, Guests, Jeep — all update reactively
-- Price per person (based on slot): ₹1,499 / ₹1,799 / ₹4,999
-- Total = Guests × Price, calculated live
-- "What makes this different?" info box below
-
-**On submit:** Renders a success card:
-> 🎉 Booking Confirmed! A confirmation will be sent to [email]. Your adventure awaits.
-
-No API call — pure React `useState` toggle.
-
----
-
-### Page 3 — Contact (`/contact`)
-
-**Two-column layout** (form left, info right; single column on mobile)
-
-**Left — Contact Form:**
-- Name, Email, Subject (dropdown: General Inquiry / Booking Help / Group Bookings / Media-Press / Feedback), Message
-- On submit: ✅ "Message received! We'll get back to you within 24 hours."
-
-**Right — Park Info:**
-- 📍 Jungle Biosphere Reserve Entry Gate 1, NH-7, MP – 481 001
-- 📞 +91 98765 43210
-- 📧 contact@predictivesafari.in
-- 🕐 Safari: 6 AM–7 PM daily · Office: 9 AM–5 PM Mon–Sat
-- Dark map placeholder (grid-line styled div, "Interactive map coming soon")
-- FAQ Accordion (4 items): smart routing · cancellations · safety · jeep count
-
----
-
-## 🧩 Components
-
-### `Navbar.jsx`
-- Logo: paw icon + **SafariIQ** (amber "IQ")
-- Links: Home · How It Works (smooth scroll to `#how-it-works`) · Contact
-- **"Book Now"** — amber filled button (always visible)
-- Scroll-aware: transparent → `bg-safari-dark/95 backdrop-blur` after 20px scroll
-- Mobile: animated hamburger → slide-down menu
-- Active link highlighted in amber via React Router `NavLink`
-
-### `Footer.jsx`
-- Logo + tagline: _"Intelligent safaris. Undisturbed wildlife."_
-- Quick Links: Home · Book Safari · Contact
-- Social icons: Twitter / Instagram (decorative, no real URLs)
-- Copyright: © 2026 Predictive Safari Intelligence System. Built for UNPLUGGED Hackathon, DJSCE.
-
-### `PackageCard.jsx`
-Props: `pkg` (object), `highlighted` (boolean)
-- When `highlighted=true`: amber border, "Most Popular" banner, filled amber Book Now button
-- Shows: name, time, guests, jeep, bestFor, price
-
-### `TestimonialCard.jsx`
-Props: `quote`, `author`, `location`
-- 5 amber stars
-- Large decorative quote mark
-- Avatar circle with author's first initial
-
-### `StepTimeline.jsx`
-Props: `steps` (array of `{icon, title, description}`)
-- Desktop: 4-column grid with horizontal amber gradient connector line
-- Mobile: vertical stack with thin amber dividers
-- Amber numbered badge on each step icon
-
-### `BookingSummary.jsx`
-Props: `formData` (object from Booking form state)
-- Maps `timeSlot` → price using internal lookup: `{ "Dawn Patrol (6:00 AM – 9:00 AM)": 1499, ... }`
-- Formats date via `toLocaleDateString('en-IN', ...)`
-- Sticky on desktop (`sticky top-24`)
-- Shows placeholder text in muted style when fields are empty
-
-### `FAQAccordion.jsx`
-Props: `items` (array of `{question, answer}`)
-- Single open at a time (toggle with `openIndex` state)
-- Smooth `max-height` transition
-- Open item: amber question text + amber chevron rotated 180°
-
----
-
-## ⚙️ Key Implementation Notes
-
-- **No backend / API calls** — all data is static or mock
-- **Form submissions** use `React.useState` to toggle success states only
-- **Scroll animations**: `IntersectionObserver` via custom `useScrollReveal` hook in `Home.jsx`
-  - Elements start with `opacity: 0; transform: translateY(30px)`
-  - `.visible` class adds `opacity: 1; transform: translateY(0)` when in viewport
-- **React Router** v7 handles all navigation. `<BrowserRouter>` wraps `<App>`.
-- **Tailwind custom component classes** are defined in `@layer components` in `index.css`:
-  - `.btn-primary`, `.btn-outline`, `.card-dark`, `.input-field`, `.label-text`, `.section-badge`, `.section-title`, `.section-subtitle`
-
----
-
-## 📦 Dependencies
-
-```json
-{
-  "dependencies": {
-    "react": "^18.x",
-    "react-dom": "^18.x",
-    "react-router-dom": "^7.x"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.x",
-    "autoprefixer": "^10.x",
-    "postcss": "^8.x",
-    "tailwindcss": "^3.x",
-    "vite": "^8.x"
-  }
-}
+```text
+Username: ranger
+Password: safari2026
 ```
 
 ---
 
-*© 2026 Predictive Safari Intelligence System — UNPLUGGED Hackathon, DJSCE*
+## Planned Integrations
+
+- Socket.io live telemetry stream from LoRa gateway
+- Node.js/Express REST API for bookings/messages
+- GeoJSON park boundary overlays for map fidelity
+- ESP32-CAM species inference pipeline
+- LoRa SX1278 long-range radio backhaul
+
+---
+
+## Built By
+
+Team — UNPLUGGED Hackathon 2026, DJSCE  
+*Predictive Safari Intelligence System — Where Technology Meets the Wild*
